@@ -168,43 +168,60 @@ from peliculas PELIS
 where DIRE.id_director is null  
 
 /*2.LISTAR PELICULAS SIN PRODUCTORAS*/
---En este caso nos devulve una respuesta vacia ya que todas las peliculas poseen una productora 
+
 select *
-from peliculas PELIS
-		left join productoras PRO ON PELIS.id_productora = PRO.id_productora
+from Peliculas PELIS
+		left join Productoras PRO ON PELIS.id_productora = PRO.id_productora
 where PRO.id_productora is null
 
 /*3.LISTAR PELICULAS SIN ACTORES*/
---Al igual que en el caso anterior todas las peliculas poseen actores
+
 select *
-from peliculas PELIS, Actores ACTO
-	left join Actuaciones ACTU ON ACTU.id_actor = ACTO.id_actor
+from peliculas PELIS
+	left join Actuaciones ACTU ON ACTU.id_pelicula = PELIS.id_pelicula 
+	left join Actores ACTO on ACTO.id_actor = ACTU.id_actor
 where ACTO.id_actor is null 
 
 /*4. LISTAR ACTORES SIN PAPELES*/
---En este ejercicio no estoy seguro si llegue al resultado correcto, se empezo a complicar
+
+
 select *
-from Actores ACTO	
-	left join actuaciones ACTU ON ACTU.id_actor = ACTO.id_actor
-	left join peliculas PELIS ON PELIS.id_pelicula = ACTU.id_pelicula
-where ACTU.papel is null 
+from Actores a
+	left join actuaciones ac ON ac.id_actor = a.id_actor
+	left join Peliculas p ON p.id_pelicula = ac.id_pelicula
+	where ac.papel is null 
 
 /*5.LISTAR CANTIDAD DE PELICULAS POR PRODUCTORA O RECAUDACION > $100.000.000*/
 
-select recaudacion
-from peliculas
- inner join Productoras PRO ON PRO.id_productora = peliculas.id_productora
- group by recaudacion 
+select pr.id_productora, pr.nombre, count(*) cantidad_peliculas, format(sum(p.recaudacion), 'C0') Recaudacion_total
+from Peliculas p 
+	inner join Productoras pr ON pr.id_productora = p.id_productora
+group by pr.id_productora, pr.nombre 
+having  sum(p.recaudacion) > 300000000.00
+
+/*6. LISTAR LOS PRODUCTORES CON MAYOR RECAUDACION*/
+
+select d.id_director, d.nombre, format (sum(p.recaudacion), 'C0') recaudacion_director
+from peliculas p
+	inner join Directores d ON d.id_director = p.id_director
+	group by d.id_director, d.nombre
+	order by 3 desc
+
+/*7. Listar los directores con mayor recaudacion en los años 80*/ 
+
+select d.nombre, format (sum (p.recaudacion),'C0')
+from peliculas p
+	inner join Directores d ON d.id_director = p.id_director
+	where p.año_estreno between 1980 and 1989 
+	group by d.nombre 
+	order by sum(p.recaudacion) desc 
 
 
 
- select año_estreno, count (*) cantidad
-from peliculas 
-group by año_estreno
---filtrando dentro de los  grupos
-having count(*)>2
-order by cantidad
-	
+
+
+
+
 
 
 
